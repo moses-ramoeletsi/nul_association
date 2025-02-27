@@ -1,18 +1,29 @@
-// /api/index.js
-import express from "express";
-import dotenv from "dotenv";
+import express from 'express';
+import dotenv from 'dotenv';
 import { dbConnection } from "../Backend/databaseConfig/databaseConnection.js";
 import adminRoute from "../Backend/routes/admin.route.js";
 
+// Setup express
 dotenv.config();
 const app = express();
 app.use(express.json());
 
-// Connect to database
-dbConnection().catch(err => console.error("Database connection error:", err));
+// Add a simple test route
+app.get('/api/health', (req, res) => {
+  res.json({ status: 'ok' });
+});
 
-// Routes
+// Your regular routes
 app.use("/api", adminRoute);
 
-// Export the Express app as the default export
-export default app;
+// Try to connect to database
+try {
+  dbConnection();
+} catch (error) {
+  console.error("Database connection error:", error);
+}
+
+// Serverless handler
+export default async function handler(req, res) {
+  return app(req, res);
+}
